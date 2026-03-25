@@ -10,31 +10,42 @@ public class SistemaMatriculasApplication {
     public static void main(String[] args) {
         SpringApplication.run(SistemaMatriculasApplication.class, args);
 
-        System.out.println("\n--- INICIANDO CONEXÃO COM O NOVO BANCO (SA-EAST-1) ---");
+        System.out.println("\n--- INICIANDO SISTEMA DE MATRÍCULAS (MACKENZIE) ---");
 
-        AlunoDAO dao = new AlunoDAO();
+        AlunoDAO alunoDao = new AlunoDAO();
+        MatriculaDAO matriculaDao = new MatriculaDAO();
 
-    
-        System.out.println("LOG: Salvando registros...");
+        alunoDao.salvar(new Aluno("Ana Julia - Sistemas de Informação"));
+        alunoDao.salvar(new Aluno("Joao Pedro - Engenharia"));
+        alunoDao.salvar(new Aluno("Maria Oliveira - Direito"));
+
+        List<Aluno> listaTodos = alunoDao.listarTodos();
         
-        Aluno ana = new Aluno("Ana Julia Mackenzie");
-        dao.salvar(ana);
-
-        Aluno carlos = new Aluno("Carlos Silva - Ciencias Contabeis");
-        dao.salvar(carlos);
-
-        
-        System.out.println("\n--- LISTAGEM FINAL PARA O TRABALHO ---");
-        List<Aluno> todos = dao.listarTodos();
-        
-        if (todos.isEmpty()) {
-            System.out.println("Aviso: O banco ainda está vazio.");
-        } else {
-            for (Aluno a : todos) {
-                System.out.println("ID: " + a.getId() + " | Nome: " + a.getNome());
+        if (listaTodos.size() >= 3) {
+            for (int i = listaTodos.size() - 3; i < listaTodos.size(); i++) {
+                Aluno aluno = listaTodos.get(i);
+                matriculaDao.salvar(new Matricula(aluno.getId(), "2024.1"));
+                matriculaDao.salvar(new Matricula(aluno.getId(), "2024.2"));
             }
         }
 
-        System.out.println("\n--- TUDO PRONTO! PODE TIRAR O PRINT AGORA ---");
+        System.out.println("\n===========================================");
+        System.out.println("      RELATÓRIO DE ALUNOS E MATRÍCULAS     ");
+        System.out.println("===========================================");
+        
+        List<Aluno> todosNoBanco = alunoDao.listarTodos();
+        
+        for (Aluno a : todosNoBanco) {
+            System.out.println("\nALUNO: [" + a.getId() + "] " + a.getNome());
+            List<Matricula> suasMatriculas = matriculaDao.listarPorAluno(a.getId());
+            
+            if (suasMatriculas.isEmpty()) {
+                System.out.println("  - Sem matrículas registradas.");
+            } else {
+                for (Matricula m : suasMatriculas) {
+                    System.out.println("  -> Matrícula ID: " + m.getId() + " | Semestre: " + m.getSemestre());
+                }
+            }
+        }
     }
 }
